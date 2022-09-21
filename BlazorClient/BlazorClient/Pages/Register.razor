@@ -1,0 +1,75 @@
+﻿@page "/Register"
+@layout LoginLayout
+@inject HttpClient http
+@inject NavigationManager navManager
+@inject SweetAlertService Swal;
+<PageTitle>Registration - YumCity</PageTitle>
+
+<div style="margin-top:200px">
+    <EditForm Model="@user" OnValidSubmit="@Registerr" class="align-content-center col-6 w-25" style="margin:auto;text-align:center;color:#1A2238;">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+        <div class="form-floating form-outline mb-4">
+            <InputText id="name" @bind-Value="user.Username" class="form-control" />
+            <label class="form-label">Username</label>
+        </div>
+        <div class="form-floating form-outline mb-4">
+            <InputText id="password" @bind-Value="user.Password" type="password" class="form-control" />
+            <label class="form-label">Password</label>
+        </div>
+        <div class="form-floating form-outline mb-4">
+            <InputText id="repeatedPassword" @bind-Value="user.RepeatedPassword" type="password" class="form-control" />
+            <label class="form-label">Repeat password</label>
+        </div>
+        <button type="submit" class="btn btn-success btn-block mb-3"><i class="bi bi-patch-plus"> Sign up</i></button>
+        <div class="text-center">
+            <p style="color:#66FCF1">Already have an account? <a @onclick="() => navManager.NavigateTo(_log)" class="btn btn-outline-primary">Sign in</a></p>
+        </div>
+    </EditForm>
+</div>
+
+@code {
+    private string _log = "/";
+    UserDto user = new();
+
+    private async Task Registerr()
+    {
+        if (!user.Password.Equals(user.RepeatedPassword))
+        {
+            await Swal.FireAsync(new SweetAlertOptions
+                {
+                    Title = "Failed",
+                    Text = "Passwords dont match",
+                    Icon = "error",
+                    Timer = 1500,
+                    ShowConfirmButton = false
+                });
+        }
+        else
+        {
+            var request = await http.PostAsJsonAsync(http.BaseAddress + "create-user", user);
+            if (request.IsSuccessStatusCode)
+            {
+                await Swal.FireAsync(new SweetAlertOptions
+                    {
+                        Title = "Registration successful",
+                        Icon = "success",
+                        Timer = 1500,
+                        ShowConfirmButton = false
+                    });
+                navManager.NavigateTo("/");
+            }
+            else
+            {
+                await Swal.FireAsync(new SweetAlertOptions
+                    {
+                        Title = "Failed",
+                        Text = await request.Content.ReadAsStringAsync(),
+                        Icon = "error",
+                        Timer = 1500,
+                        ShowConfirmButton = false
+                    });
+            }
+        }
+    }
+    }

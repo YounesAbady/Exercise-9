@@ -1,7 +1,11 @@
 ﻿@page "/ListCategories"
 @inject HttpClient http
+@inject SweetAlertService Swal;
+@inject IJSRuntime JS
+@inject NavigationManager navManager
+@inject ILocalStorageService localStorage
 
-<PageTitle>Categories-YumCity</PageTitle>
+<PageTitle>Categories - YumCity</PageTitle>
 <div>
     <div class="row row-cols-1 row-cols-md-3 g-2 text-center">
         @foreach (var item in _categories)
@@ -11,7 +15,7 @@
                     <div class="card h-100 text-center" style="border:groove;border-color:#66FCF1;background-color:transparent;margin-left:2px;margin-top:50px;">
                         <div class="card-body">
                             <h5 class="card-title" style="color:white">@item.Data</h5>
-                            <a @onclick="() => _category = item" class="btn btn-dark" style="background-color:#1F2833;color:#C5C6C7;margin-top:10px;" data-bs-toggle="modal" data-bs-target="#editCategory"><i class="bi bi-pencil-square" style="font-style:normal"> Edit</i></a>
+                            <a @onclick="() => {_category.Id = item.Id;_category.Data=item.Data;_category.IsActive=item.IsActive;}" class="btn btn-dark" style="background-color:#1F2833;color:#C5C6C7;margin-top:10px;" data-bs-toggle="modal" data-bs-target="#editCategory"><i class="bi bi-pencil-square" style="font-style:normal"> Edit</i></a>
                             <a @onclick="() => _category.Id = item.Id" class="btn btn-danger" style="color:white;margin-top:10px;" data-bs-toggle="modal" data-bs-target="#deleteCategoryModal"><i class="bi bi-trash" style="font-style:normal"> Delete</i></a>
                         </div>
                     </div>
@@ -21,7 +25,7 @@
     </div>
 </div>
 <div class="text-center m-4">
-    <button style="background-color:#252f3e;color:white;" class="btn text-center" data-bs-toggle="modal" data-bs-target="#createCategory"><i class="bi bi-plus-circle" style="font-style:normal"> Create Category</i></button>
+    <button @onclick="() => _category=new()" style="background-color:#252f3e;color:white;" class="btn text-center" data-bs-toggle="modal" data-bs-target="#createCategory"><i class="bi bi-plus-circle" style="font-style:normal"> Create Category</i></button>
 </div>
 
 <!-- Create Category-->
@@ -33,13 +37,14 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <EditForm Model="@_category" OnValidSubmit="@CreateCategory" class="align-content-center col-6 needs-validation" style="margin:auto;text-align:center;margin-top:50px;color:#1A2238">
+                <EditForm Model="@_category" OnValidSubmit="@CreateCategory" class="align-content-center col-6" style="margin:auto;text-align:center;margin-top:50px;color:#1A2238">
                     <DataAnnotationsValidator />
                     <ValidationSummary />
 
                     <InputText id="name" @bind-Value="_category.Data" />
 
-                    <button type="submit" class="btn btn-success text-center isWorking mt-2" style="font-style:normal" data-bs-dismiss="modal"> Add</button>
+                    <button type="submit" class="btn btn-success text-center mt-2" style="font-style:normal"> Add</button>
+                    <button hidden type="button" data-bs-dismiss="modal" class="close-modal"></button>
                 </EditForm>
             </div>
         </div>
@@ -75,13 +80,14 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <EditForm Model="@_category" OnValidSubmit="@UpdateCategory" class="align-content-center col-6 needs-validation" style="margin:auto;text-align:center;margin-top:50px;color:#1A2238">
+                <EditForm Model="@_category" OnValidSubmit="@UpdateCategory" class="align-content-center col-6" style="margin:auto;text-align:center;margin-top:50px;color:#1A2238">
                     <DataAnnotationsValidator />
                     <ValidationSummary />
 
                     <InputText id="name" @bind-Value="_category.Data" />
 
-                    <button type="submit" class="btn btn-success text-center isWorking mt-2" style="font-style:normal" data-bs-dismiss="modal"> Edit</button>
+                    <button type="submit" class="btn btn-success text-center mt-2" style="font-style:normal"> Edit</button>
+                    <button hidden type="button" data-bs-dismiss="modal" class="close-modal"></button>
                 </EditForm>
             </div>
         </div>
@@ -89,34 +95,93 @@
 </div>
 
 @code {
-    //private List<CategoryEntity> _categories = new();
     private List<CategoryDto> _categories = new();
     private CategoryDto _category = new();
 
     protected override async Task OnInitializedAsync()
     {
-        //_categories = await http.GetFromJsonAsync<List<CategoryDto>>("https://localhost:7007/api/list-categories");
-        var result = await http.GetFromJsonAsync<List<CategoryDto>>("https://localhost:7007/api/list-categories");
+        var token = await localStorage.GetItemAsStringAsync("token");
+        http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token.Replace("\"", ""));
+        var result = await http.GetFromJsonAsync<List<CategoryDto>>(http.BaseAddress + "list-categories");
         if (result is not null)
             _categories = result;
     }
+
     private async Task CreateCategory()
     {
-        var request = await http.PostAsJsonAsync("https://localhost:7007/api/add-category", _category.Data);
+        var token = await localStorage.GetItemAsStringAsync("token");
+        http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token.Replace("\"", ""));
+        var request = await http.PostAsJsonAsync(http.BaseAddress + "add-category", _category.Data);
         if (request.IsSuccessStatusCode)
+        {
+            await Swal.FireAsync(new SweetAlertOptions
+                {
+                    Title = "Created successfully",
+                    Icon = "success",
+                    Timer = 1500,
+                    ShowConfirmButton = false
+                });
             await OnInitializedAsync();
-
+            await JS.InvokeVoidAsync("close");
+        }
+        else
+        {
+            await Swal.FireAsync(new SweetAlertOptions
+                {
+                    Title = "Failed",
+                    Text = await request.Content.ReadAsStringAsync(),
+                    Icon = "error",
+                    Timer = 1500,
+                    ShowConfirmButton = false
+                });
+        }
     }
+
     private async Task DeleteCategory()
     {
-        var request = await http.DeleteAsync($"https://localhost:7007/api/delete-category/{_category.Id}");
+        var token = await localStorage.GetItemAsStringAsync("token");
+        http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token.Replace("\"", ""));
+        var request = await http.DeleteAsync(http.BaseAddress + $"delete-category/{_category.Id}");
         if (request.IsSuccessStatusCode)
+        {
             await OnInitializedAsync();
+            await Swal.FireAsync(new SweetAlertOptions
+                {
+                    Title = "Deleted successfully",
+                    Icon = "success",
+                    Timer = 1500,
+                    ShowConfirmButton = false
+                });
+        }
     }
+
     private async Task UpdateCategory()
     {
-        var request = await http.PutAsJsonAsync($"https://localhost:7007/api/update-category/{_category.Id}", _category.Data);
+        var token = await localStorage.GetItemAsStringAsync("token");
+        http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token.Replace("\"", ""));
+        var request = await http.PutAsJsonAsync(http.BaseAddress + $"update-category/{_category.Id}", _category.Data);
         if (request.IsSuccessStatusCode)
+        {
+            await Swal.FireAsync(new SweetAlertOptions
+                {
+                    Title = "Edited successfully",
+                    Icon = "success",
+                    Timer = 1500,
+                    ShowConfirmButton = false
+                });
             await OnInitializedAsync();
+            await JS.InvokeVoidAsync("close");
+        }
+        else
+        {
+            await Swal.FireAsync(new SweetAlertOptions
+                {
+                    Title = "Failed",
+                    Text = await request.Content.ReadAsStringAsync(),
+                    Icon = "error",
+                    Timer = 1500,
+                    ShowConfirmButton = false
+                });
+        }
     }
     }

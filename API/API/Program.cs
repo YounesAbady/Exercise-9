@@ -42,7 +42,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration.GetSection("Token").Value)),
             ValidateIssuer = true,
             ValidateAudience = true,
-            ValidAudience = "https://localhost:7024/",
+            ValidAudience = "https://localhost:7264",
             ValidIssuer = "Younes Abady",
             ClockSkew = TimeSpan.Zero
         };

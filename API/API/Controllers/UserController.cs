@@ -87,7 +87,7 @@ namespace Backend.Controllers
         {
             try
             {
-                await RecipeController.GlobalAntiforgery.ValidateRequestAsync(HttpContext);
+                //await RecipeController.GlobalAntiforgery.ValidateRequestAsync(HttpContext);
                 RuntimeConfiguration.ConfigureDQE<PostgreSqlDQEConfiguration>(c => c.AddDbProviderFactory(typeof(NpgsqlFactory)));
                 using (var adapter = new DataAccessAdapter(_configuration.GetConnectionString("YumCityDb")))
                 {
@@ -120,7 +120,7 @@ namespace Backend.Controllers
         {
             try
             {
-                await RecipeController.GlobalAntiforgery.ValidateRequestAsync(HttpContext);
+                //await RecipeController.GlobalAntiforgery.ValidateRequestAsync(HttpContext);
                 RuntimeConfiguration.ConfigureDQE<PostgreSqlDQEConfiguration>(c => c.AddDbProviderFactory(typeof(NpgsqlFactory)));
                 using (var adapter = new DataAccessAdapter(_configuration.GetConnectionString("YumCityDb")))
                 {
@@ -150,7 +150,7 @@ namespace Backend.Controllers
         {
             try
             {
-                await RecipeController.GlobalAntiforgery.ValidateRequestAsync(HttpContext);
+                //await RecipeController.GlobalAntiforgery.ValidateRequestAsync(HttpContext);
                 RuntimeConfiguration.ConfigureDQE<PostgreSqlDQEConfiguration>(c => c.AddDbProviderFactory(typeof(NpgsqlFactory)));
                 using (var adapter = new DataAccessAdapter(_configuration.GetConnectionString("YumCityDb")))
                 {
@@ -224,7 +224,7 @@ namespace Backend.Controllers
                 expires: DateTime.Now.AddMinutes(3),
                 signingCredentials: cred,
                 issuer: "Younes Abady",
-                audience: "https://localhost:7024/"
+                audience: "https://localhost:7264"
                 );
             var jwt = new JwtSecurityTokenHandler().WriteToken(token);
             return jwt;

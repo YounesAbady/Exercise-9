@@ -19,7 +19,7 @@ namespace API.Controllers
         }
 
         [HttpGet]
-        [Route("api/list-categories")/*, Authorize*/]
+        [Route("api/list-categories"), Authorize]
         public async Task<ActionResult<string>> ListCategories()
         {
             try
@@ -43,7 +43,7 @@ namespace API.Controllers
         }
 
         [HttpPost]
-        [Route("api/add-category")/*, Authorize*/]
+        [Route("api/add-category"), Authorize]
         public async Task<ActionResult> AddCategory([FromBody] string category)
         {
             try
@@ -81,7 +81,7 @@ namespace API.Controllers
         }
 
         [HttpDelete]
-        [Route("api/delete-category/{id}")/*, Authorize*/]
+        [Route("api/delete-category/{id}"), Authorize]
         public async Task<ActionResult> DeleteCategory(Guid id)
         {
             try
@@ -118,7 +118,7 @@ namespace API.Controllers
         }
 
         [HttpPut]
-        [Route("api/update-category/{id}")/*, Authorize*/]
+        [Route("api/update-category/{id}"), Authorize]
         public async Task<ActionResult> UpdateCategory(Guid id, [FromBody] string newCategory)
         {
             try
@@ -134,6 +134,11 @@ namespace API.Controllers
                     else
                     {
                         var recipeCategories = metaData.RecipeCategory;
+                        var SearchedCategory = await metaData.Category.FirstOrDefaultAsync(c => c.Data == newCategory && c.IsActive == true);
+                        if (SearchedCategory is not null)
+                        {
+                            return BadRequest("Category already exists!");
+                        }
                         foreach (RecipeCategoryEntity recipeCategory in recipeCategories)
                         {
                             if (recipeCategory.Data == category.Data)

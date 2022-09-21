@@ -7,24 +7,16 @@
                 <ul class="navbar-nav">
                     <li style="margin-top:30px">
                         <div class="logo-holder logo-5">
-                            <a @onclick="() => navManager.NavigateTo(home)" class="nav-link text-light">
+                            <a class="nav-link text-light">
                                 <h3>Yum</h3>
                                 <p>City</p>
                             </a>
                         </div>
                     </li>
                 </ul>
-                <div class="ms-auto">
-                    <a @onclick="() => navManager.NavigateTo(log,true)"
-                       class="btn btn-outline-dark" style="color:#66FCF1">
-                        <span class="glyphicon glyphicon-log-out"></span> Log out
-                    </a>
-                </div>
             </div>
         </div>
     </nav>
 </header>
 @code {
-    private string log = "/";
-    private string home = "/Home";
 }
