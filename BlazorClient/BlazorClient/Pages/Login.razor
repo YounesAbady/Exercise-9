@@ -43,14 +43,12 @@
             http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token.Replace("\"", ""));
             var req = await http.PostAsJsonAsync(http.BaseAddress + "get-id", user);
             var id = await req.Content.ReadAsStringAsync();
-            await localStorage.SetItemAsync("loggedUserId", id.ToString());
+            await localStorage.SetItemAsync("loggedUserId", id);
             await localStorage.SetItemAsync("token", token);
-            var startTimeSpan = TimeSpan.Zero;
-            var periodTimeSpan = TimeSpan.FromMinutes(1);
             var timer = new System.Threading.Timer((e) =>
             {
                 GetNewToken(id.ToString(), user);
-            }, null, startTimeSpan, periodTimeSpan);
+            }, null, TimeSpan.Zero, TimeSpan.FromMinutes(2));
             await Swal.FireAsync(new SweetAlertOptions
                 {
                     Title = "Logged in successfully",

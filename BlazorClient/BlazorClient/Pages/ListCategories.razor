@@ -41,6 +41,7 @@
                     <DataAnnotationsValidator />
                     <ValidationSummary />
 
+                    <label style="text-align:left">Category Title</label>
                     <InputText id="name" @bind-Value="_category.Data" />
 
                     <button type="submit" class="btn btn-success text-center mt-2" style="font-style:normal"> Add</button>
@@ -72,6 +73,7 @@
 </div>
 
 <!--Update Category-->
+
 <div class="modal fade" id="editCategory" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -84,6 +86,7 @@
                     <DataAnnotationsValidator />
                     <ValidationSummary />
 
+                    <label style="text-align:left">Category Title</label>
                     <InputText id="name" @bind-Value="_category.Data" />
 
                     <button type="submit" class="btn btn-success text-center mt-2" style="font-style:normal"> Edit</button>
@@ -102,9 +105,23 @@
     {
         var token = await localStorage.GetItemAsStringAsync("token");
         http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token.Replace("\"", ""));
-        var result = await http.GetFromJsonAsync<List<CategoryDto>>(http.BaseAddress + "list-categories");
-        if (result is not null)
-            _categories = result;
+        try
+        {
+            var result = await http.GetFromJsonAsync<List<CategoryDto>>(http.BaseAddress + "list-categories");
+            if (result is not null)
+                _categories = result;
+        }
+        catch (Exception e)
+        {
+            await Swal.FireAsync(new SweetAlertOptions
+                {
+                    Title = "Failed",
+                    Text = e.Message,
+                    Icon = "error",
+                    Timer = 1500,
+                    ShowConfirmButton = false
+                });
+        }
     }
 
     private async Task CreateCategory()

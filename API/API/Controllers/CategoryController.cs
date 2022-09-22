@@ -31,7 +31,7 @@ namespace API.Controllers
                     var metaData = new LinqMetaData(adapter);
                     var categories = await metaData.Category.Where(x => x.IsActive == true).OrderBy(x => x.Data).ToListAsync();
                     if (categories.Count() == 0)
-                        throw new InvalidOperationException("Cant be empty");
+                        return BadRequest("There are no categories");
                     else
                         return Ok(categories);
                 }

@@ -30,14 +30,14 @@ namespace API.Controllers
         {
             try
             {
-                await GlobalAntiforgery.ValidateRequestAsync(HttpContext);
+                //await GlobalAntiforgery.ValidateRequestAsync(HttpContext);
                 RuntimeConfiguration.ConfigureDQE<PostgreSqlDQEConfiguration>(c => c.AddDbProviderFactory(typeof(Npgsql.NpgsqlFactory)));
                 using (var adapter = new DataAccessAdapter(_configuration.GetConnectionString("YumCityDb")))
                 {
                     var metaData = new LinqMetaData(adapter);
                     var recipes = await metaData.Recipe.Where(p => p.IsActive).With(p => p.Ingredients.Where(x => x.IsActive), p => p.Instructions.Where(x => x.IsActive), p => p.RecipeCategories.Where(x => x.IsActive)).OrderBy(p => p.Title).ToListAsync();
                     if (recipes.Count() == 0)
-                        throw new InvalidOperationException("Cant be empty");
+                        return BadRequest("There are no recipes");
                     else
                     {
                         return Ok(recipes);
@@ -56,13 +56,13 @@ namespace API.Controllers
         {
             try
             {
-                await GlobalAntiforgery.ValidateRequestAsync(HttpContext);
+                //await GlobalAntiforgery.ValidateRequestAsync(HttpContext);
                 RecipeEntity recipe = Convert(recipeDto);
                 RuntimeConfiguration.ConfigureDQE<PostgreSqlDQEConfiguration>(c => c.AddDbProviderFactory(typeof(Npgsql.NpgsqlFactory)));
                 using (var adapter = new DataAccessAdapter(_configuration.GetConnectionString("YumCityDb")))
                 {
                     var metaData = new LinqMetaData(adapter);
-                    if (recipe is null)
+                    if (recipeDto is null)
                         return BadRequest("Cant be empty");
                     else
                     {
@@ -83,15 +83,13 @@ namespace API.Controllers
         {
             try
             {
-                await GlobalAntiforgery.ValidateRequestAsync(HttpContext);
+                //await GlobalAntiforgery.ValidateRequestAsync(HttpContext);
                 RuntimeConfiguration.ConfigureDQE<PostgreSqlDQEConfiguration>(c => c.AddDbProviderFactory(typeof(Npgsql.NpgsqlFactory)));
                 using (var adapter = new DataAccessAdapter(_configuration.GetConnectionString("YumCityDb")))
                 {
                     var metaData = new LinqMetaData(adapter);
                     RecipeEntity oldRecipe = await metaData.Recipe.FirstOrDefaultAsync(x => x.Id == id && x.IsActive);
-                    newRecipe.Ingredients = newRecipe.Ingredients.Where(r => !string.IsNullOrWhiteSpace(r)).ToList();
-                    newRecipe.Instructions = newRecipe.Instructions.Where(r => !string.IsNullOrWhiteSpace(r)).ToList();
-                    if (newRecipe.Ingredients.Count == 0 || newRecipe.Instructions.Count == 0 || newRecipe.Categories.Count == 0 || string.IsNullOrWhiteSpace(newRecipe.Title) || id == Guid.Empty)
+                    if (newRecipe.Ingredients.Count == 0 || newRecipe.Instructions.Count == 0 || newRecipe.RecipeCategories.Count == 0 || string.IsNullOrWhiteSpace(newRecipe.Title) || id == Guid.Empty)
                         throw new InvalidOperationException("Cant be empty");
                     else
                     {
@@ -111,12 +109,12 @@ namespace API.Controllers
         }
 
         [HttpDelete]
-        [Route("api/delete-recipe"), Authorize]
-        public async Task<ActionResult> DeleteRecipe([FromBody] Guid id)
+        [Route("api/delete-recipe/{id}"), Authorize]
+        public async Task<ActionResult> DeleteRecipe(Guid id)
         {
             try
             {
-                await GlobalAntiforgery.ValidateRequestAsync(HttpContext);
+                //await GlobalAntiforgery.ValidateRequestAsync(HttpContext);
                 if (id == Guid.Empty)
                     throw new InvalidOperationException("Cant be empty");
                 else
@@ -151,14 +149,9 @@ namespace API.Controllers
         {
             RecipeEntity recipe = new();
             recipe.IsActive = true;
-            if (string.IsNullOrEmpty(recipeDto.Id.ToString()) || Guid.Equals(recipeDto.Id, Guid.Empty))
-                recipe.Id = Guid.NewGuid();
-            else
-                recipe.Id = recipeDto.Id;
+            recipe.Id = recipeDto.Id;
             recipe.Title = recipeDto.Title;
-            recipeDto.Ingredients = recipeDto.Ingredients.Where(r => !string.IsNullOrWhiteSpace(r)).ToList();
-            recipeDto.Instructions = recipeDto.Instructions.Where(r => !string.IsNullOrWhiteSpace(r)).ToList();
-            if (recipeDto.Ingredients.Count == 0 || recipeDto.Instructions.Count == 0 || recipeDto.Categories.Count == 0 || string.IsNullOrWhiteSpace(recipeDto.Title))
+            if (recipeDto.Ingredients.Count == 0 || recipeDto.Instructions.Count == 0 || recipeDto.RecipeCategories.Count == 0 || string.IsNullOrWhiteSpace(recipeDto.Title))
                 return null;
             else
             {
@@ -167,7 +160,7 @@ namespace API.Controllers
                     IngredientEntity ingredient = new()
                     {
                         Id = Guid.NewGuid(),
-                        Data = item,
+                        Data = item.Data,
                         RecipeId = recipe.Id,
                         IsActive = true
                     };
@@ -178,18 +171,18 @@ namespace API.Controllers
                     InstructionEntity instruction = new()
                     {
                         Id = Guid.NewGuid(),
-                        Data = item,
+                        Data = item.Data,
                         RecipeId = recipe.Id,
                         IsActive = true
                     };
                     recipe.Instructions.Add(instruction);
                 }
-                foreach (var item in recipeDto.Categories)
+                foreach (var item in recipeDto.RecipeCategories)
                 {
                     RecipeCategoryEntity recipeCategory = new()
                     {
                         Id = Guid.NewGuid(),
-                        Data = item,
+                        Data = item.Data,
                         RecipeId = recipe.Id,
                         IsActive = true
                     };

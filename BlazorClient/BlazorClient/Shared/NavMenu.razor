@@ -1,5 +1,5 @@
 ﻿@inject NavigationManager navManager
-
+@inject ILocalStorageService localStorage
 <header>
     <nav class="row navbar navbar-expand" style="height:60px;width:100%">
         <div class="container-fluid">
@@ -15,7 +15,7 @@
                     </li>
                 </ul>
                 <div class="ms-auto">
-                    <a @onclick="() => navManager.NavigateTo(log,true)"
+                    <a @onclick="@LogOut"
                        class="btn btn-outline-dark" style="color:#66FCF1">
                         <span class="glyphicon glyphicon-log-out"></span> Log out
                     </a>
@@ -25,6 +25,12 @@
     </nav>
 </header>
 @code {
-    private string log = "/";
     private string home = "/Home";
+
+    private async Task LogOut()
+    {
+        await localStorage.RemoveItemAsync("token");
+        await localStorage.RemoveItemAsync("loggedUserId");
+        navManager.NavigateTo("/", true);
+    }
 }

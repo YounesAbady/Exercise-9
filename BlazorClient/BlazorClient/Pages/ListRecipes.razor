@@ -1,5 +1,355 @@
 ﻿@page "/ListRecipes"
+@using System.ComponentModel.DataAnnotations
 @inject HttpClient http
-@code {
+@inject ILocalStorageService localStorage
+@inject SweetAlertService Swal;
+@inject IJSRuntime JS
+<PageTitle>Recipes - YumCity</PageTitle>
 
-}
+<div class="row row-cols-1 row-cols-md-4 g-2 m-auto text-center" id="autoScroll">
+    @foreach (var recipe in _recipes)
+    {
+        <div class="col">
+            <div class="card h-100 text-center m-3" style="background-color:transparent;border:groove;border-color:#66FCF1;">
+                <div class="card-body">
+                    <h5 class="card-title" style="color:white">@recipe.Title</h5>
+                    <br>
+                    <a @onclick="() => {_recipe=new();_recipe.Id= recipe.Id;_recipe.Title= recipe.Title;ConvertToEdit(recipe.Ingredients,recipe.Instructions,recipe.RecipeCategories);}" class="btn btn-dark" style="background-color:#1F2833;color:#C5C6C7;margin-top:10px;font-style:normal" data-bs-toggle="modal" data-bs-target="#editRecipe"><i class="bi bi-eye" style="font-style:normal"> View</i></a>
+                    <a @onclick="() => _recipe.Id = recipe.Id" class="btn btn-danger" style="color:white;margin-top:10px;font-style:normal" data-bs-toggle="modal" data-bs-target="#deleteRecipeModal"><i class="bi bi-trash" style="font-style:normal"> Delete</i></a>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+<div class="text-center m-4">
+    <button @onclick="() =>{ _recipe = new();ing=string.Empty;ins=string.Empty;cats=new string[10];}" style="background-color:#252f3e;color:white;" class="btn" data-bs-toggle="modal" data-bs-target="#createRecipe"><i class="bi bi-plus-circle" style="font-style:normal"> Create Recipe</i></button>
+</div>
+
+<!--Create Recipe-->
+
+<div class="modal fade" id="createRecipe" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="staticBackdropLabel" style="color:black">Create Recipe</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <EditForm Model="_recipe" OnValidSubmit="@CreateRecipe" class="align-content-center col-6" style="margin:auto;text-align:center;margin-top:50px;color:black">
+                    <div>
+                        <div class="row mt-4 col-11 m-auto">
+                            <label style="text-align:left">Recipe Title</label>
+                            <InputText id="Title" @bind-Value="_recipe.Title" class="form-control"></InputText>
+                        </div>
+                        <div class="row mt-4 col-11 m-auto">
+                            <label style="text-align:left">Ingredients</label>
+                            <InputTextArea id="ingredients" @bind-Value="ing" class="form-control resize" placeholder="After every ingredient press enter for new line." rows="5" cols="30"></InputTextArea>
+                        </div>
+                        <div class="row mt-4 col-11 m-auto">
+                            <label style="text-align:left">Instructions</label>
+                            <InputTextArea id="instructions" class="form-control resize" @bind-Value="ins" placeholder="After every instructions press enter for new line." rows="5" cols="30"></InputTextArea>
+                        </div>
+                        <div class="row mt-4 col-11 m-auto">
+                            <form method="post">
+                                <label style="text-align:left">Choose one or more category</label>
+                                <br>
+                                <InputSelect id="categories" @bind-Value="cats" class="form-control" style="color:black">
+                                    @foreach (var item in _categories)
+                                    {
+                                        <option value=@item.Data>@item.Data</option>
+                                    }
+                                </InputSelect>
+                                <p style="font-weight:bold">Hold down the Ctrl (windows) or Command (Mac) button to select multiple options.</p>
+                            </form>
+                        </div>
+                        <br><br>
+                    </div>
+                    <button type="submit" class="btn btn-success"><i class="bi bi-plus-circle-fill" style="font-style:normal"> Create Recipe</i></button>
+                    <button hidden type="button" data-bs-dismiss="modal" class="close-modal"></button>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Delete Recipe-->
+
+<div class="modal fade" id="deleteRecipeModal" tabindex="-1" aria-labelledby="deleteRecipeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" style="text-align:center">
+                Are you sure?
+                <br />
+                You won't be able to revert this!
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button @onclick="@DeleteRecipe" type="submit" class="btn btn-primary" style="margin-right:125px" data-bs-dismiss="modal">Yes, delete it!</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Edit Recipe-->
+
+<div class="modal fade" id="editRecipe" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="staticBackdropLabel" style="color:black">Edit Recipe</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <EditForm Model="_recipe" OnValidSubmit="@EditRecipe" class="align-content-center col-6" style="margin:auto;text-align:center;margin-top:50px;color:black">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary />
+
+                    <div>
+                        <div class="row mt-4 col-11 m-auto">
+                            <label style="text-align:left">Recipe Title</label>
+                            <InputText id="Title" @bind-Value="_recipe.Title" class="form-control"></InputText>
+                        </div>
+                        <div class="row mt-4 col-11 m-auto">
+                            <label style="text-align:left">Ingredients</label>
+                            <InputTextArea @bind-Value="ing" class="form-control resize" placeholder="separate between ingredients with a new line" rows="5" cols="30">
+                            </InputTextArea>
+                        </div>
+                        <div class="row mt-4 col-11 m-auto">
+                            <label style="text-align:left">Instructions</label>
+                            <InputTextArea @bind-Value="ins" class="form-control resize" placeholder="separate between instructions with a new line" rows="5" cols="30" required>
+                            </InputTextArea>
+                        </div>
+                        <div class="row mt-4 col-11 m-auto">
+                            <form>
+                                <label style="font:bolder;text-align:left" class="fw-bold">Choose one or more category</label>
+                                <br>
+                                <InputSelect @bind-Value="cats" class="form-control" multiple style="color:black" required>
+                                    @foreach (var cat in _categories)
+                                    {
+                                        if (cats.Contains(cat.Data))
+                                        {
+                                            <option selected value=@cat.Data>@cat.Data</option>
+                                        }
+                                        else
+                                        {
+                                            <option value=@cat.Data>@cat.Data</option>
+                                        }
+                                    }
+                                </InputSelect>
+                                <p style="font-weight:bolder">Hold down the Ctrl (windows) or Command (Mac) button to select multiple options.</p>
+                            </form>
+                        </div>
+                        <br>
+                    </div>
+                    <button type="submit" class="btn btn-success" style="font-style:normal"> Edit</button>
+                    <button hidden type="button" data-bs-dismiss="modal" class="close-modal"></button>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<RecipeDto> _recipes = new();
+    private List<CategoryDto> _categories = new();
+    private RecipeDto _recipe = new();
+    private string ing = string.Empty;
+    private string ins = string.Empty;
+    private string[] cats = new string[10];
+
+    protected override async Task OnInitializedAsync()
+    {
+        var token = await localStorage.GetItemAsStringAsync("token");
+        http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token.Replace("\"", ""));
+        try{
+        var result = await http.GetFromJsonAsync<List<RecipeDto>>(http.BaseAddress + "list-recipes");
+        if (result is not null)
+            _recipes = result;
+        }
+        catch(Exception e)
+        {
+            await Swal.FireAsync(new SweetAlertOptions
+                {
+                    Title = "Failed",
+                    Text = e.Message,
+                    Icon = "error",
+                    Timer = 1500,
+                    ShowConfirmButton = false
+                });
+        }
+        try {
+        var resultCategories = await http.GetFromJsonAsync<List<CategoryDto>>(http.BaseAddress + "list-categories");
+        if (resultCategories is not null)
+            _categories = resultCategories;
+        }
+
+        catch(Exception e)
+        {
+            await Swal.FireAsync(new SweetAlertOptions
+                {
+                    Title = "Failed",
+                    Text = e.Message,
+                    Icon = "error",
+                    Timer = 1500,
+                    ShowConfirmButton = false
+                });
+        }
+    }
+
+    private async Task EditRecipe()
+    {
+        await Convert();
+        var id = await localStorage.GetItemAsStringAsync("loggedUserId");
+        id = id.Replace("u0022", "").Replace("\"", "").Replace("\\", "");
+        _recipe.UserId = Guid.Parse(id);
+        var token = await localStorage.GetItemAsStringAsync("token");
+        http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token.Replace("\"", ""));
+        var request = await http.PutAsJsonAsync(http.BaseAddress + $"update-recipe/{_recipe.Id}", _recipe);
+        if (request.IsSuccessStatusCode)
+        {
+            await Swal.FireAsync(new SweetAlertOptions
+                {
+                    Title = "Edited successfully",
+                    Icon = "success",
+                    Timer = 1500,
+                    ShowConfirmButton = false
+                });
+            await OnInitializedAsync();
+            await JS.InvokeVoidAsync("close");
+        }
+        else
+        {
+            await Swal.FireAsync(new SweetAlertOptions
+                {
+                    Title = "Failed",
+                    Text = await request.Content.ReadAsStringAsync(),
+                    Icon = "error",
+                    Timer = 1500,
+                    ShowConfirmButton = false
+                });
+        }
+    }
+
+    private async Task DeleteRecipe()
+    {
+        var token = await localStorage.GetItemAsStringAsync("token");
+        http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token.Replace("\"", ""));
+        var request = await http.DeleteAsync(http.BaseAddress + $"delete-recipe/{_recipe.Id}");
+        if (request.IsSuccessStatusCode)
+        {
+            await OnInitializedAsync();
+            await Swal.FireAsync(new SweetAlertOptions
+                {
+                    Title = "Deleted successfully",
+                    Icon = "success",
+                    Timer = 1500,
+                    ShowConfirmButton = false
+                });
+        }
+    }
+
+    private async Task CreateRecipe()
+    {
+        _recipe.Id = Guid.NewGuid();
+        await Convert();
+        var id = await localStorage.GetItemAsStringAsync("loggedUserId");
+        id = id.Replace("u0022", "").Replace("\"", "").Replace("\\", "");
+        _recipe.UserId = Guid.Parse(id);
+        var token = await localStorage.GetItemAsStringAsync("token");
+        http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token.Replace("\"", ""));
+        var request = await http.PostAsJsonAsync(http.BaseAddress + "add-recipe", _recipe);
+        if (request.IsSuccessStatusCode)
+        {
+            await Swal.FireAsync(new SweetAlertOptions
+                {
+                    Title = "Created successfully",
+                    Icon = "success",
+                    Timer = 1500,
+                    ShowConfirmButton = false
+                });
+            await OnInitializedAsync();
+            await JS.InvokeVoidAsync("close");
+        }
+        else
+        {
+            await Swal.FireAsync(new SweetAlertOptions
+                {
+                    Title = "Failed",
+                    Text = await request.Content.ReadAsStringAsync(),
+                    Icon = "error",
+                    Timer = 1500,
+                    ShowConfirmButton = false
+                });
+        }
+    }
+
+    private async Task<RecipeDto> Convert()
+    {
+        ing = ing.Replace("/", "");
+        ins = ins.Replace("/", "");
+        var ingList = ing.Split("\n");
+        var insList = ins.Split("\n");
+        foreach (var item in ingList)
+        {
+            if (string.IsNullOrEmpty(item))
+                continue;
+            IngredientDto ingredient = new()
+                {
+                    Data = item,
+                    Id = Guid.NewGuid(),
+                    IsActive = true,
+                    RecipeId = _recipe.Id
+                };
+            _recipe.Ingredients.Add(ingredient);
+        }
+        foreach (var item in insList)
+        {
+            if (string.IsNullOrEmpty(item))
+                continue;
+            InstructiontDto instruction = new()
+                {
+                    Data = item,
+                    Id = Guid.NewGuid(),
+                    IsActive = true,
+                    RecipeId = _recipe.Id
+                };
+            _recipe.Instructions.Add(instruction);
+        }
+        foreach (var item in cats)
+        {
+            if (string.IsNullOrEmpty(item))
+                continue;
+            RecipeCategoryDto category = new()
+                {
+                    Data = item,
+                    Id = Guid.NewGuid(),
+                    IsActive = true,
+                    RecipeId = _recipe.Id
+                };
+            _recipe.RecipeCategories.Add(category);
+        }
+        return _recipe;
+    }
+
+    private async Task ConvertToEdit(List<IngredientDto> ingredients, List<InstructiontDto> instructionts, List<RecipeCategoryDto> recipeCategories)
+    {
+        Array.Clear(cats);
+        cats = new string[10];
+        ing = string.Empty;
+        ins = string.Empty;
+        for (int i = 0; i < recipeCategories.Count(); i++)
+        {
+            cats[i] = recipeCategories[i].Data;
+        }
+        foreach (var item in ingredients)
+        {
+            ing += item.Data + "\n";
+        }
+        foreach (var item in instructionts)
+            ins += item.Data + "\n";
+        }
+    }
+    }
