@@ -40,9 +40,10 @@
                 <EditForm Model="@_category" OnValidSubmit="@CreateCategory" class="align-content-center col-6" style="margin:auto;text-align:center;margin-top:50px;color:#1A2238">
                     <DataAnnotationsValidator />
                     <ValidationSummary />
-
-                    <label style="text-align:left">Category Title</label>
-                    <InputText id="name" @bind-Value="_category.Data" />
+                    <div class="form-floating">
+                        <InputText class="form-control" id="name" @bind-Value="_category.Data" />
+                        <label class="form-label" style="text-align:left">Category Title</label>
+                    </div>
 
                     <button type="submit" class="btn btn-success text-center mt-2" style="font-style:normal"> Add</button>
                     <button hidden type="button" data-bs-dismiss="modal" class="close-modal"></button>
@@ -86,9 +87,10 @@
                     <DataAnnotationsValidator />
                     <ValidationSummary />
 
-                    <label style="text-align:left">Category Title</label>
-                    <InputText id="name" @bind-Value="_category.Data" />
-
+                    <div class="form-floating">
+                        <InputText class="form-control" id="name" @bind-Value="_category.Data" />
+                        <label class="form-label" style="text-align:left">Category Title</label>
+                    </div>
                     <button type="submit" class="btn btn-success text-center mt-2" style="font-style:normal"> Edit</button>
                     <button hidden type="button" data-bs-dismiss="modal" class="close-modal"></button>
                 </EditForm>
