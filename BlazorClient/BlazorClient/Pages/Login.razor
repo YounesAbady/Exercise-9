@@ -41,6 +41,7 @@
         {
             var token = await request.Content.ReadAsStringAsync();
             http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token.Replace("\"", ""));
+            //var antiforgery = await GetAntiforgery();
             var req = await http.PostAsJsonAsync(http.BaseAddress + "get-id", user);
             var id = await req.Content.ReadAsStringAsync();
             await localStorage.SetItemAsync("loggedUserId", id);
@@ -82,5 +83,19 @@
         var newToken = await newTokenRequest.Content.ReadAsStringAsync();
         await localStorage.RemoveItemAsync("token");
         await localStorage.SetItemAsync("token", newToken);
+    }
+
+    private async Task<string> GetAntiforgery()
+    {
+        var token = await localStorage.GetItemAsStringAsync("token");
+        http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token.Replace("\"", ""));
+        var req = await http.GetAsync(http.BaseAddress + "antiforgery");
+        if (req.IsSuccessStatusCode)
+        {
+            string xsrfToken = req.Headers.Where(x => x.Key == "XSRF-TOKEN").FirstOrDefault().ToString();
+            return xsrfToken;
+        }
+        else
+            return null;
     }
 }

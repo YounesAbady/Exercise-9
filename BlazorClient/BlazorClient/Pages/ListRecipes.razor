@@ -58,19 +58,14 @@
                             <label style="text-align:left">Instructions</label>
                             <InputTextArea id="instructions" class="form-control" @bind-Value="_input.Instructions" placeholder="After every instructions press enter for new line." rows="5" cols="30" oninput="this.setAttribute('style', 'height:' + (this.scrollHeight) + 'px;overflow-y:hidden;'); this.style.height = 'auto'; this.style.height = (this.scrollHeight) + 'px';"></InputTextArea>
                         </div>
-                        <div class="row mt-4 col-11 m-auto">
-                            <form>
-                                <label style="text-align:left">Choose one or more category</label>
-                                <br>
+                            <form class="row mt-4 col-11 m-auto">
                                 <InputSelect id="categories" @bind-Value="_input.Categories" class="form-control" style="color:black">
                                     @foreach (var item in _categories)
                                     {
                                         <option value=@item.Data>@item.Data</option>
                                     }
                                 </InputSelect>
-                                <p style="font-weight:bold">Hold down the Ctrl (windows) or Command (Mac) button to select multiple options.</p>
                             </form>
-                        </div>
                     </div>
                     <button type="submit" class="btn btn-success"><i class="bi bi-plus-circle-fill" style="font-style:normal"> Create Recipe</i></button>
                     <button hidden type="button" data-bs-dismiss="modal" class="close-modal"></button>
@@ -114,7 +109,6 @@
                 <EditForm Model="_input" OnValidSubmit="@EditRecipe" class="align-content-center col-6" style="margin:auto;text-align:center;margin-top:50px;color:black">
                     <DataAnnotationsValidator />
                     <ValidationSummary />
-
                     <div>
                         <div class="row mt-4 col-11 m-auto">
                             <label style="text-align:left">Recipe Title</label>
@@ -127,13 +121,11 @@
                         </div>
                         <div class="row mt-4 col-11 m-auto">
                             <label style="text-align:left">Instructions</label>
-                            <InputTextArea @bind-Value="_input.Instructions" class="form-control" placeholder="separate between instructions with a new line" rows="5" cols="30" oninput="this.setAttribute('style', 'height:' + (this.scrollHeight) + 'px;overflow-y:hidden;'); this.style.height = 'auto'; this.style.height = (this.scrollHeight) + 'px';">
+                            <InputTextArea  @bind-Value="_input.Instructions" class="form-control" placeholder="separate between instructions with a new line" rows="5" cols="30" oninput="this.setAttribute('style', 'height:' + (this.scrollHeight) + 'px;overflow-y:hidden;'); this.style.height = 'auto'; this.style.height = (this.scrollHeight) + 'px';">
                             </InputTextArea>
                         </div>
-                        <div class="row mt-4 col-11 m-auto">
-                            <form>  
+                            <form class="row mt-4 col-11 m-auto">  
                                 <label style="font:bolder;text-align:left" class="fw-bold">Choose one or more category</label>
-                                <br>
                                 <InputSelect @bind-Value="_input.Categories" class="form-control" multiple style="color:black">
                                     @foreach (var cat in _categories)
                                     {
@@ -149,7 +141,6 @@
                                 </InputSelect>
                                 <p style="font-weight:bolder">Hold down the Ctrl (windows) or Command (Mac) button to select multiple options.</p>
                             </form>
-                        </div>
                     </div>
                     <button type="submit" class="btn btn-success" style="font-style:normal"> Edit</button>
                     <button hidden type="button" data-bs-dismiss="modal" class="close-modal"></button>
@@ -185,12 +176,12 @@
                     ShowConfirmButton = false
                 });
         }
+
         try {
             var resultCategories = await http.GetFromJsonAsync<List<CategoryDto>>(http.BaseAddress + "list-categories");
             if (resultCategories is not null)
                 _categories = resultCategories;
         }
-
         catch(Exception e)
         {
             await Swal.FireAsync(new SweetAlertOptions
@@ -278,7 +269,7 @@
         _recipe.Title = _input.Title;
         _recipe.Id = Guid.NewGuid();
         await Convert();
-                    if (_recipe.RecipeCategories.Count() < 1)
+        if (_recipe.RecipeCategories.Count() < 1)
         {
             await Swal.FireAsync(new SweetAlertOptions
                 {
