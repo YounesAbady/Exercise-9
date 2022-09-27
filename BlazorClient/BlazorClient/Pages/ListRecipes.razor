@@ -21,7 +21,7 @@
                     }
                     </ul>
                     <br>
-                    <a @onclick="() => {_recipe=new();_input=new();_recipe.Id= recipe.Id;_input.Title=recipe.Title;ConvertToEdit(recipe.Ingredients,recipe.Instructions,recipe.RecipeCategories);}" class="btn btn-dark" style="background-color:#1F2833;color:#C5C6C7;margin-top:10px;font-style:normal" data-bs-toggle="modal" data-bs-target="#editRecipe"><i class="bi bi-eye" style="font-style:normal"> View</i></a>
+                    <a @onclick="() => {_recipe=new();_input=new();_recipe.Id= recipe.Id;_input.Title=recipe.Title;ConvertToEdit(recipe.Ingredients,recipe.Instructions,recipe.RecipeCategories);JS.InvokeVoidAsync(toast);}" class="btn btn-dark" style="background-color:#1F2833;color:#C5C6C7;margin-top:10px;font-style:normal" data-bs-toggle="modal" data-bs-target="#editRecipe"><i class="bi bi-eye" style="font-style:normal"> View</i></a>
                     <a @onclick="() => _recipe.Id = recipe.Id" class="btn btn-danger" style="color:white;margin-top:10px;font-style:normal" data-bs-toggle="modal" data-bs-target="#deleteRecipeModal"><i class="bi bi-trash" style="font-style:normal"> Delete</i></a>
                 </div>
             </div>
@@ -99,6 +99,20 @@
 <!--Edit Recipe-->
 
 <div class="modal fade" id="editRecipe" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+     
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index:11">
+        <div id="liveToast" class="toast hide" role="alert" aria-live="assertive" aria-atomic="true" style="background-color:#66FCF1">
+            <div class="toast-header">
+                <strong class="me-auto">Yum City</strong>
+                <small>Just Now!</small>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body" style="background-color:#1F2833;color:white">
+                Hello, Chief! mouse over ingredients / instructions to see them clearly.
+            </div>
+        </div>
+    </div>
+
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
@@ -116,12 +130,12 @@
                         </div>
                         <div class="row mt-4 col-11 m-auto">
                             <label style="text-align:left">Ingredients</label>
-                            <InputTextArea @bind-Value="_input.Ingredients" class="form-control" placeholder="separate between ingredients with a new line" rows="5" cols="30" oninput="this.setAttribute('style', 'height:' + (this.scrollHeight) + 'px;overflow-y:hidden;'); this.style.height = 'auto'; this.style.height = (this.scrollHeight) + 'px';">
+                            <InputTextArea @bind-Value="_input.Ingredients" class="form-control" placeholder="separate between ingredients with a new line" rows="5" cols="30" oninput="this.setAttribute('style', 'height:' + (this.scrollHeight) + 'px;overflow-y:hidden;'); this.style.height = 'auto'; this.style.height = (this.scrollHeight) + 'px';" onmouseover="this.setAttribute('style', 'height:' + (this.scrollHeight) + 'px;overflow-y:hidden;'); this.style.height = 'auto'; this.style.height = (this.scrollHeight) + 'px';">
                                 </InputTextArea>
                         </div>
                         <div class="row mt-4 col-11 m-auto">
                             <label style="text-align:left">Instructions</label>
-                            <InputTextArea  @bind-Value="_input.Instructions" class="form-control" placeholder="separate between instructions with a new line" rows="5" cols="30" oninput="this.setAttribute('style', 'height:' + (this.scrollHeight) + 'px;overflow-y:hidden;'); this.style.height = 'auto'; this.style.height = (this.scrollHeight) + 'px';">
+                            <InputTextArea  @bind-Value="_input.Instructions" class="form-control" placeholder="separate between instructions with a new line" rows="5" cols="30" oninput="this.setAttribute('style', 'height:' + (this.scrollHeight) + 'px;overflow-y:hidden;'); this.style.height = 'auto'; this.style.height = (this.scrollHeight) + 'px';" onmouseover="this.setAttribute('style', 'height:' + (this.scrollHeight) + 'px;overflow-y:hidden;'); this.style.height = 'auto'; this.style.height = (this.scrollHeight) + 'px';">
                             </InputTextArea>
                         </div>
                             <form class="row mt-4 col-11 m-auto">  
@@ -155,7 +169,7 @@
     private List<CategoryDto> _categories = new();
     private RecipeDto _recipe = new();
     private RecipeInput _input = new();
-
+    private string toast = "toast";
     protected override async Task OnInitializedAsync()
     {
         var token = await localStorage.GetItemAsStringAsync("token");

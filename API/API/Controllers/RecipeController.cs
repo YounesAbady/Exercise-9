@@ -136,15 +136,6 @@ namespace API.Controllers
             }
         }
 
-        [HttpGet]
-        [Route("api/antiforgery"), Authorize]
-        public void GetAntiforgery()
-        {
-            GlobalAntiforgery = _antiforgery;
-            var tokens = GlobalAntiforgery.GetAndStoreTokens(HttpContext);
-            HttpContext.Response.Cookies.Append("XSRF-TOKEN", tokens.RequestToken!, new CookieOptions { HttpOnly = false, SameSite = SameSiteMode.None, Secure = true });
-        }
-
         private RecipeEntity Convert(RecipeDto recipeDto)
         {
             RecipeEntity recipe = new();
