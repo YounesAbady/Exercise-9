@@ -13,7 +13,8 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 builder.Services.AddSweetAlert2();
 builder.Services.AddHxServices();
 
-builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("https://localhost:7007/api/") });
+builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("https://younesabady.azurewebsites.net/api/") });
+//builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("https://localhost:7007/api/") });
 builder.Services.AddBlazoredLocalStorage();
 
 

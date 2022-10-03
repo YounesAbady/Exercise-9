@@ -15,13 +15,13 @@
                     <h5 class="card-title" style="color:white">@recipe.Title</h5>
                     <br>
                     <ul class="card-text" style="color:#66FCF1;text-align:left">
-                    @foreach(var category in recipe.RecipeCategories)
-                    {
-                        <li>@category.Data</li>
-                    }
+                        @foreach (var category in recipe.RecipeCategories)
+                        {
+                            <li>@category.Data</li>
+                        }
                     </ul>
                     <br>
-                    <a @onclick="() => {_recipe=new();_input=new();_recipe.Id= recipe.Id;_input.Title=recipe.Title;ConvertToEdit(recipe.Ingredients,recipe.Instructions,recipe.RecipeCategories);JS.InvokeVoidAsync(toast);}" class="btn btn-dark" style="background-color:#1F2833;color:#C5C6C7;margin-top:10px;font-style:normal" data-bs-toggle="modal" data-bs-target="#editRecipe"><i class="bi bi-eye" style="font-style:normal"> View</i></a>
+                    <a @onclick="() => {_recipe=new();_input=new();_recipe.Id= recipe.Id;_input.Title=recipe.Title;ConvertToEdit(recipe.Ingredients,recipe.Instructions,recipe.RecipeCategories);JS.InvokeVoidAsync(toast);}" class="btn btn-dark" style="background-color:#1F2833;color:#C5C6C7;margin-top:10px;font-style:normal" data-bs-toggle="modal" data-bs-target="#viewRecipe"><i class="bi bi-eye" style="font-style:normal"> View</i></a>
                     <a @onclick="() => _recipe.Id = recipe.Id" class="btn btn-danger" style="color:white;margin-top:10px;font-style:normal" data-bs-toggle="modal" data-bs-target="#deleteRecipeModal"><i class="bi bi-trash" style="font-style:normal"> Delete</i></a>
                 </div>
             </div>
@@ -58,14 +58,14 @@
                             <label style="text-align:left">Instructions</label>
                             <InputTextArea id="instructions" class="form-control" @bind-Value="_input.Instructions" placeholder="After every instructions press enter for new line." rows="5" cols="30" oninput="this.setAttribute('style', 'height:' + (this.scrollHeight) + 'px;overflow-y:hidden;'); this.style.height = 'auto'; this.style.height = (this.scrollHeight) + 'px';"></InputTextArea>
                         </div>
-                            <form class="row mt-4 col-11 m-auto">
-                                <InputSelect id="categories" @bind-Value="_input.Categories" class="form-control" style="color:black">
-                                    @foreach (var item in _categories)
-                                    {
-                                        <option value=@item.Data>@item.Data</option>
-                                    }
-                                </InputSelect>
-                            </form>
+                        <form class="row mt-4 col-11 m-auto">
+                            <InputSelect id="categories" @bind-Value="_input.Categories" class="form-control" style="color:black">
+                                @foreach (var item in _categories)
+                                {
+                                    <option value=@item.Data>@item.Data</option>
+                                }
+                            </InputSelect>
+                        </form>
                     </div>
                     <button type="submit" class="btn btn-success"><i class="bi bi-plus-circle-fill" style="font-style:normal"> Create Recipe</i></button>
                     <button hidden type="button" data-bs-dismiss="modal" class="close-modal"></button>
@@ -99,7 +99,7 @@
 <!--Edit Recipe-->
 
 <div class="modal fade" id="editRecipe" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-     
+
     <div class="position-fixed bottom-0 end-0 p-3" style="z-index:11">
         <div id="liveToast" class="toast hide" role="alert" aria-live="assertive" aria-atomic="true" style="background-color:#66FCF1">
             <div class="toast-header">
@@ -117,7 +117,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="staticBackdropLabel" style="color:black">Edit Recipe</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button @onclick="() => JS.InvokeVoidAsync(close)" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <EditForm Model="_input" OnValidSubmit="@EditRecipe" class="align-content-center col-6" style="margin:auto;text-align:center;margin-top:50px;color:black">
@@ -131,30 +131,30 @@
                         <div class="row mt-4 col-11 m-auto">
                             <label style="text-align:left">Ingredients</label>
                             <InputTextArea @bind-Value="_input.Ingredients" class="form-control" placeholder="separate between ingredients with a new line" rows="5" cols="30" oninput="this.setAttribute('style', 'height:' + (this.scrollHeight) + 'px;overflow-y:hidden;'); this.style.height = 'auto'; this.style.height = (this.scrollHeight) + 'px';" onmouseover="this.setAttribute('style', 'height:' + (this.scrollHeight) + 'px;overflow-y:hidden;'); this.style.height = 'auto'; this.style.height = (this.scrollHeight) + 'px';">
-                                </InputTextArea>
+                            </InputTextArea>
                         </div>
                         <div class="row mt-4 col-11 m-auto">
                             <label style="text-align:left">Instructions</label>
-                            <InputTextArea  @bind-Value="_input.Instructions" class="form-control" placeholder="separate between instructions with a new line" rows="5" cols="30" oninput="this.setAttribute('style', 'height:' + (this.scrollHeight) + 'px;overflow-y:hidden;'); this.style.height = 'auto'; this.style.height = (this.scrollHeight) + 'px';" onmouseover="this.setAttribute('style', 'height:' + (this.scrollHeight) + 'px;overflow-y:hidden;'); this.style.height = 'auto'; this.style.height = (this.scrollHeight) + 'px';">
+                            <InputTextArea @bind-Value="_input.Instructions" class="form-control" placeholder="separate between instructions with a new line" rows="5" cols="30" oninput="this.setAttribute('style', 'height:' + (this.scrollHeight) + 'px;overflow-y:hidden;'); this.style.height = 'auto'; this.style.height = (this.scrollHeight) + 'px';" onmouseover="this.setAttribute('style', 'height:' + (this.scrollHeight) + 'px;overflow-y:hidden;'); this.style.height = 'auto'; this.style.height = (this.scrollHeight) + 'px';">
                             </InputTextArea>
                         </div>
-                            <form class="row mt-4 col-11 m-auto">  
-                                <label style="font:bolder;text-align:left" class="fw-bold">Choose one or more category</label>
-                                <InputSelect @bind-Value="_input.Categories" class="form-control" multiple style="color:black">
-                                    @foreach (var cat in _categories)
+                        <form class="row mt-4 col-11 m-auto">
+                            <label style="font:bolder;text-align:left" class="fw-bold">Choose one or more category</label>
+                            <InputSelect @bind-Value="_input.Categories" class="form-control" multiple style="color:black">
+                                @foreach (var cat in _categories)
+                                {
+                                    if (_input.Categories.Contains(cat.Data))
                                     {
-                                        if (_input.Categories.Contains(cat.Data))
-                                        {
-                                            <option selected value=@cat.Data>@cat.Data</option>
-                                        }
-                                        else
-                                        {
-                                            <option value=@cat.Data>@cat.Data</option>
-                                        }
+                                        <option selected value=@cat.Data>@cat.Data</option>
                                     }
-                                </InputSelect>
-                                <p style="font-weight:bolder">Hold down the Ctrl (windows) or Command (Mac) button to select multiple options.</p>
-                            </form>
+                                    else
+                                    {
+                                        <option value=@cat.Data>@cat.Data</option>
+                                    }
+                                }
+                            </InputSelect>
+                            <p style="font-weight:bolder">Hold down the Ctrl (windows) or Command (Mac) button to select multiple options.</p>
+                        </form>
                     </div>
                     <button type="submit" class="btn btn-success" style="font-style:normal"> Edit</button>
                     <button hidden type="button" data-bs-dismiss="modal" class="close-modal"></button>
@@ -164,22 +164,91 @@
     </div>
 </div>
 
+<!--View Recipe-->
+
+<div class="modal fade" id="viewRecipe" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button @onclick="() => JS.InvokeVoidAsync(close)" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <EditForm Model="_input" class="align-content-center col-6" style="margin:auto;text-align:center;margin-top:50px;color:black">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary />
+                    <div>
+                        <div class="row mt-4 col-11 m-auto">
+                            <InputText class="text-center" id="Title" @bind-Value="_input.Title" disabled></InputText>
+                        </div>
+                        <div class="row mt-4 col-11 m-auto">
+                            <label class="text-center" style="color:#252f3e">Ingredients</label>
+                            <br /><br />
+                            <ul>
+                                @foreach (var item in viewIng)
+                                {
+                                    <li>
+                                        @item
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                        <div class="row mt-4 col-11 m-auto">
+                            <label class="text-center" style="color:#252f3e">Instructions</label>
+                            <br /><br />
+                            <ul>
+                                @foreach (var item in viewIns)
+                                {
+                                    <li>
+                                        @item
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                        <div class="row mt-4 col-11 text-start m-auto">
+                            <label class="text-center" style="color:#252f3e">Categories</label>
+                            <br /><br />
+                            <ul>
+                                @foreach (var item in _input.Categories)
+                                {
+                                    @if (item is not null)
+                                    {
+                                        <li>
+                                            @item
+                                        </li>
+                                    }
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-outline-primary" data-bs-target="#editRecipe" data-bs-toggle="modal" aria-label="Edit"><i class="bi bi-pencil-square">Edit</i></button>
+                    <button hidden type="button" data-bs-dismiss="modal" class="close-modal"></button>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 @code {
     private List<RecipeDto> _recipes = new();
     private List<CategoryDto> _categories = new();
     private RecipeDto _recipe = new();
     private RecipeInput _input = new();
     private string toast = "toast";
+    private string close = "close";
+    private List<string> viewIng = new();
+    private List<string> viewIns = new();
     protected override async Task OnInitializedAsync()
     {
         var token = await localStorage.GetItemAsStringAsync("token");
         http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token.Replace("\"", ""));
-        try{
+        try
+        {
             var result = await http.GetFromJsonAsync<List<RecipeDto>>(http.BaseAddress + "list-recipes");
             if (result is not null)
                 _recipes = result;
         }
-        catch(Exception e)
+        catch (Exception e)
         {
             await Swal.FireAsync(new SweetAlertOptions
                 {
@@ -191,12 +260,13 @@
                 });
         }
 
-        try {
+        try
+        {
             var resultCategories = await http.GetFromJsonAsync<List<CategoryDto>>(http.BaseAddress + "list-categories");
             if (resultCategories is not null)
                 _categories = resultCategories;
         }
-        catch(Exception e)
+        catch (Exception e)
         {
             await Swal.FireAsync(new SweetAlertOptions
                 {
@@ -214,7 +284,7 @@
 
         _recipe.Title = _input.Title;
         await Convert();
-        if (_recipe.RecipeCategories.Count() <1 )
+        if (_recipe.RecipeCategories.Count() < 1)
         {
             await Swal.FireAsync(new SweetAlertOptions
                 {
@@ -383,6 +453,8 @@
         _input.Categories = new string[10];
         _input.Ingredients = string.Empty;
         _input.Instructions = string.Empty;
+        viewIng = new();
+        viewIns = new();
         for (int i = 0; i < recipeCategories.Count(); i++)
         {
             _input.Categories[i] = recipeCategories[i].Data;
@@ -390,9 +462,12 @@
         foreach (var item in ingredients)
         {
             _input.Ingredients += item.Data + "\n";
+            viewIng.Add(item.Data);
         }
         foreach (var item in instructionts)
+        {
             _input.Instructions += item.Data + "\n";
+            viewIns.Add(item.Data);
         }
     }
     }

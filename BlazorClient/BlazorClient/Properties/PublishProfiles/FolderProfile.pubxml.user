@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--
+https://go.microsoft.com/fwlink/?LinkID=208121.
+-->
+<Project>
+  <PropertyGroup>
+    <_PublishTargetUrl>D:\SIlverKey\Exercise-9\BlazorClient\BlazorClient\bin\Release\net6.0\browser-wasm\publish\</_PublishTargetUrl>
+    <History>False|2022-10-03T13:17:59.6424652Z;False|2022-10-03T15:17:34.3246373+02:00;True|2022-09-28T13:15:54.2691196+02:00;</History>
+  </PropertyGroup>
+</Project>
